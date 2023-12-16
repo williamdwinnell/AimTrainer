@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Enhanced Click Game</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            color: white;
+        }
+
+        .game-container {
+            background-color: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+
+        .game-header h1 {
+            color: #ffffff;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px #000000;
+        }
+
+        .score-timer {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+        }
+
+        .game-area {
+            position: relative;
+            width: 600px;
+            height: 400px;
+            background: rgba(0, 0, 0, 0.3);
+            margin: 0 auto;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+        }
+
+        .target {
+            width: 65px;
+            height: 65px;
+            position: absolute;
+            background-color: #ff5050;
+            border-radius: 50%;
+            cursor: pointer;
+            opacity: .92;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+            user-select: none;
+            transition: transform 0.2s ease;
+        }
+
+        .target:hover {
+            transform: scale(1.1);
+        }
+
+        .line {
+            stroke: white;
+            stroke-width: 2px;
+        }
+
+        .game-footer button {
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 18px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .game-footer button:hover {
+            background-color: #81c784;
+        }
+
+        .scoreboard {
+            margin-top: 20px;
+            background-color: rgba(255, 255, 255, 0.2);
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+
+        .scoreboard h3 {
+            color: #ffffff;
+            margin-bottom: 10px;
+            text-shadow: 1px 1px 3px #000000;
+        }
+
+        #topScoresList {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        #topScoresList li {
+            background-color: rgba(255, 255, 255, 0.25);
+            margin: 5px 0;
+            padding: 5px;
+            border-radius: 4px;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            font-size: 18px; /* Larger font size for better visibility */
+            font-weight: 500; /* Medium font weight for a bolder look */
+            color: #e0e0e0; /* Soft white color for readability */
+            text-shadow: 1px 1px 2px #000000; /* Text shadow for depth */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .color-slider-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        /* Custom Slider Styling */
+        #colorSlider {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 200px;
+            height: 10px;
+            background: transparent;
+            outline: none;
+            transition: background-color 0.2s ease;
+        }
+
+        /* Slider Thumb */
+        #colorSlider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 25px;
+            height: 25px;
+            margin-top: -7.5px;
+            background: linear-gradient(45deg, #fff, #9e9e9e);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4), 0 0 0 5px rgba(255, 255, 255, 0.3);
+            border: 1px solid #000;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        #colorSlider::-moz-range-thumb {
+            width: 35px;
+            height: 35px;
+            background: linear-gradient(45deg, #fff, #9e9e9e);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4), 0 0 0 5px rgba(255, 255, 255, 0.3);
+            border: 1px solid #000;
+        }
+
+        /* Slider Track */
+        #colorSlider::-webkit-slider-runnable-track {
+            height: 10px;
+            cursor: pointer;
+            animate: 0.2s;
+            box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.4);
+            border-radius: 5px;
+            background: linear-gradient(to right, #667eea, #764ba2);
+        }
+
+        #colorSlider::-moz-range-track {
+            height: 10px;
+            cursor: pointer;
+            animate: 0.2s;
+            box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.4);
+            border-radius: 5px;
+            background: linear-gradient(to right, #667eea, #764ba2);
+        }
+
+        /* Hover Effect on Slider Thumb for WebKit Browsers */
+        #colorSlider::-webkit-slider-thumb:hover {
+            transform: scale(1.1); /* Enlarge thumb */
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.6); /* Increase shadow */
+            background: linear-gradient(45deg, #e0e0e0, #b0b0b0); /* Optional: Change background */
+        }
+
+        /* Hover Effect on Slider Thumb for Mozilla Browsers */
+        #colorSlider::-moz-range-thumb:hover {
+            transform: scale(1.1); /* Enlarge thumb */
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.6); /* Increase shadow */
+            background: linear-gradient(45deg, #e0e0e0, #b0b0b0); /* Optional: Change background */
+        }
+
+        /* Color Value Display */
+        .color-value-display {
+            color: #fff;
+            font-size: 14px;
+            text-align: center;
+            margin-top: 5px;
+        }
+        .difficulty-tabs {
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .difficulty-tabs button {
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 0 10px;
+            transition: background-color 0.3s;
+        }
+
+        .difficulty-tabs button:hover {
+            background-color: #81c784;
+        }
+
+        .difficulty-tabs button.active {
+            background-color: #81c784;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="color-slider-container">
+        <input type="range" id="colorSlider" min="0" max="360" value="180" step="18">
+        <div class="color-value-display" id="colorValueDisplay">180°</div>
+    </div>
+
+    <div class="game-container">
+
+        <!-- Difficulty Tabs -->
+        <div class="difficulty-tabs">
+            <button id="easyTab">Easy</button>
+            <button id="mediumTab">Medium</button>
+            <button id="hardTab">Hard</button>
+        </div>
+
+        <div class="game-header">
+            <h1>Click Master</h1>
+            <div class="score-timer">
+                <div class="score">Score: <span id="score">0</span></div>
+                <div class="timer">Time: <span id="timer">30</span>s</div>
+            </div>
+        </div>
+        <div class="game-area" id="gameArea">
+            <svg id="lineSvg" width="600px" height="400px" style="position: absolute; top: 0; left: 0;"></svg>
+        </div>
+        <div class="game-footer">
+            <button id="restartButton">Restart Game</button>
+        </div>
+        <!-- High Score Boards for Each Difficulty -->
+        <div id="easyScores" class="scoreboard" style="display: none;">
+            <h3>Top Scores (Easy)</h3>
+            <ol id="topScoresListEasy"></ol>
+        </div>
+        <div id="mediumScores" class="scoreboard" style="display: none;">
+            <h3>Top Scores (Medium)</h3>
+            <ol id="topScoresListMedium"></ol>
+        </div>
+        <div id="hardScores" class="scoreboard">
+            <h3>Top Scores (Hard)</h3>
+            <ol id="topScoresListHard"></ol>
+        </div>
+    </div>
+    <script>
+       document.addEventListener('DOMContentLoaded', () => {
+            const gameArea = document.getElementById('gameArea');
+            const scoreDisplay = document.getElementById('score');
+            const timerDisplay = document.getElementById('timer');
+            const restartButton = document.getElementById('restartButton');
+            const lineSvg = document.getElementById('lineSvg'); // SVG container for lines
+            let score = 0;
+            let timeLeft = 30;
+            let countdownInterval;
+            let currentTarget = 1;
+            let previousTargetElement = null;
+
+            // Difficulty settings
+            let difficulty = 'easy'; // Default difficulty
+            const difficultySettings = {
+                easy: { targetCount: 3, targetSize: 90 },
+                medium: { targetCount: 5, targetSize: 75 },
+                hard: { targetCount: 8, targetSize: 65 }
+            };
+
+            // Event listeners for difficulty tabs
+            document.getElementById('easyTab').addEventListener('click', () => setDifficulty('easy'));
+            document.getElementById('mediumTab').addEventListener('click', () => setDifficulty('medium'));
+            document.getElementById('hardTab').addEventListener('click', () => setDifficulty('hard'));
+
+            function updateTabActiveState() {
+                ['easy', 'medium', 'hard'].forEach(diff => {
+                    const btn = document.getElementById(diff + 'Tab');
+                    btn.classList.remove('active');
+                    if (diff === difficulty) {
+                        btn.classList.add('active');
+                    }
+                });
+            }
+
+            function updateScoreboardDisplay() {
+                ['easy', 'medium', 'hard'].forEach(diff => {
+                    const board = document.getElementById(diff + 'Scores');
+                    board.classList.remove('active');
+                    if (diff === difficulty) {
+                        board.classList.add('active');
+                    }
+                });
+            }
+
+            function createTargets() {
+                clearTargetsAndLines();
+                const gridSize = 70;
+                const rows = Math.floor(gameArea.offsetHeight / gridSize);
+                const cols = Math.floor(gameArea.offsetWidth / gridSize);
+                const usedPositions = new Set();
+                const settings = difficultySettings[difficulty];
+                let targetCount = settings.targetCount;
+                let targetSize = settings.targetSize;
+
+                for (let i = 1; i <= targetCount; i++) {
+                    let position;
+                    let attempts = 0;
+                    let target;
+
+                    do {
+                        const row = Math.floor(Math.random() * rows);
+                        const col = Math.floor(Math.random() * cols);
+                        position = `${row}-${col}`;
+
+                        attempts++;
+                        if (attempts > 10000) {
+                            console.error('Too many attempts to place targets');
+                            return;
+                        }
+                    } while (usedPositions.has(position));
+
+                    usedPositions.add(position);
+
+                    const [row, col] = position.split('-').map(Number);
+                    target = document.createElement('div');
+                    target.classList.add('target');
+                    target.textContent = i;
+                    target.id = 'target' + i;
+                    target.style.left = `${col * gridSize + (gridSize - targetSize) / 2}px`;
+                    target.style.top = `${row * gridSize + (gridSize - targetSize) / 2}px`;
+                    target.style.width = `${targetSize}px`;
+                    target.style.height = `${targetSize}px`;
+
+                    gameArea.appendChild(target);
+                }
+            }
+
+            function drawLine(fromElement, toElement) {
+                // Create a new line element
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('class', 'line');
+
+                // Calculate positions relative to the game area
+                const fromRect = fromElement.getBoundingClientRect();
+                const toRect = toElement.getBoundingClientRect();
+                const gameAreaRect = gameArea.getBoundingClientRect();
+
+                line.setAttribute('x1', fromRect.left + fromRect.width / 2 - gameAreaRect.left);
+                line.setAttribute('y1', fromRect.top + fromRect.height / 2 - gameAreaRect.top);
+                line.setAttribute('x2', toRect.left + toRect.width / 2 - gameAreaRect.left);
+                line.setAttribute('y2', toRect.top + toRect.height / 2 - gameAreaRect.top);
+
+                // Append the line to the SVG container
+                lineSvg.appendChild(line);
+            }
+
+            function clearTargetsAndLines() {
+                // Clear only the target elements
+                const targets = gameArea.querySelectorAll('.target');
+                targets.forEach(target => gameArea.removeChild(target));
+
+                // Clear lines in the SVG container
+                lineSvg.innerHTML = '';
+
+                // Reset tracking variables
+                currentTarget = 1;
+                previousTargetElement = null;
+            }
+
+
+            function restartGame() {
+                clearInterval(countdownInterval);
+                clearTargetsAndLines();
+                startGame();
+            }
+
+            function startGame() {
+                score = 0;
+                timeLeft = 30;
+                scoreDisplay.textContent = score;
+                timerDisplay.textContent = timeLeft;
+                restartButton.style.display = 'none';
+                createTargets();
+                countdownInterval = setInterval(updateTimer, 1000);
+            }
+
+            function updateTimer() {
+                timeLeft--;
+                timerDisplay.textContent = timeLeft;
+                if (timeLeft <= 0) {
+                    endGame();
+                }
+            }
+
+            function endGame() {
+                clearInterval(countdownInterval);
+                restartButton.style.display = 'block';
+                clearTargetsAndLines();
+                updateTopScores(score);
+            }
+
+            function onTargetClick(target) {
+                const targetNumber = parseInt(target.textContent, 10);
+                const settings = difficultySettings[difficulty];
+                let targetCount = settings.targetCount;
+
+                if (targetNumber === currentTarget) {
+                    score++;
+                    scoreDisplay.textContent = score;
+                    if (previousTargetElement) {
+                        drawLine(previousTargetElement, target);
+                    }
+                    previousTargetElement = target;
+                    currentTarget++;
+                    if (currentTarget > targetCount) { // Use dynamic target count based on difficulty
+                        setTimeout(() => {
+                            clearTargetsAndLines();
+                            createTargets();
+                            currentTarget = 1; // Reset currentTarget for new set of targets
+                            previousTargetElement = null; // Reset previous target
+                        }, 250); // Add a delay before creating new targets
+                    }
+                }
+            }
+
+            function displayTopScores() {
+                let topScores = JSON.parse(localStorage.getItem('topScores_' + difficulty)) || [];
+                const topScoresList = document.getElementById('topScoresList' + capitalizeFirstLetter(difficulty));
+
+                topScoresList.innerHTML = topScores.map(score => `<li>${score}</li>`).join('');
+            }
+
+            // Utility function to capitalize the first letter (for element IDs)
+            function capitalizeFirstLetter(string) {
+                return string.charAt(0).toUpperCase() + string.slice(1);
+            }
+
+            function updateScoreboardDisplay() {
+                // Hide all scoreboards initially
+                ['easy', 'medium', 'hard'].forEach(diff => {
+                    const board = document.getElementById(diff + 'Scores');
+                    board.style.display = 'none'; // Use style.display to hide/show
+                });
+
+                // Show the scoreboard for the current difficulty
+                const currentBoard = document.getElementById(difficulty + 'Scores');
+                currentBoard.style.display = 'block';
+            }
+
+            function setDifficulty(newDifficulty) {
+                difficulty = newDifficulty;
+                updateTabActiveState();
+                updateScoreboardDisplay();
+                restartGame(); // Restart the game with new difficulty settings
+                displayTopScores(); // Update and display high scores for the new difficulty
+            }
+
+            function updateTopScores(newScore) {
+                let topScores = JSON.parse(localStorage.getItem('topScores_' + difficulty)) || [];
+                topScores.push(newScore);
+                topScores.sort((a, b) => b - a);
+                topScores = topScores.slice(0, 3);
+
+                localStorage.setItem('topScores_' + difficulty, JSON.stringify(topScores));
+                displayTopScores();
+            }
+
+            gameArea.addEventListener('click', (event) => {
+                if (event.target.classList.contains('target')) {
+                    onTargetClick(event.target);
+                }
+            });
+
+            document.getElementById('colorSlider').addEventListener('input', (event) => {
+                const value = event.target.value;
+                updateColorScheme(value);
+                document.getElementById('colorValueDisplay').textContent = `${hueValue}°`;
+            });
+
+            function updateColorScheme(value) {
+                // Hue calculation remains the same for full spectrum
+                const hue = value * 2 % 360;
+
+                // More diverse saturation, ranging from 30% to 80%
+                const saturation = 30 + 50 * Math.sin(value * Math.PI / 180);
+
+                // Darker lightness, ranging from 20% to 40%
+                const lightness = 20 + 20 * Math.cos(value * Math.PI / 180);
+
+                // Apply the new color scheme
+                document.body.style.background = `linear-gradient(135deg, hsl(${hue}, ${saturation}%, ${lightness}%), hsl(${hue + 30}, ${saturation}%, ${lightness}%))`;
+                const gameArea = document.getElementById('gameArea');
+                gameArea.style.background = `hsl(${hue}, ${saturation - 10}%, ${lightness - 10}%)`;
+            }
+
+
+            function updateColorScheme(hue) {
+                document.body.style.background = `linear-gradient(135deg, hsl(${hue}, 60%, 65%), hsl(${hue + 30}, 60%, 45%))`;
+                const gameArea = document.getElementById('gameArea');
+                gameArea.style.background = `rgba(0, 0, 0, 0.3)`;
+                // Adjust other elements' color as needed
+            }
+
+            restartButton.addEventListener('click', restartGame);
+            startGame();
+            displayTopScores();
+        });
+    </script>
+</body>
+</html>
